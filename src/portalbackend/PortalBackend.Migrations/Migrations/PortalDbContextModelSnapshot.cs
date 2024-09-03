@@ -36,10 +36,130 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
             modelBuilder
                 .HasDefaultSchema("portal")
                 .UseCollation("en_US.utf8")
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset?>("LockExpiryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("lock_expiry_date");
+
+                    b.Property<int>("ProcessTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("process_type_id");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_processes");
+
+                    b.HasIndex("ProcessTypeId")
+                        .HasDatabaseName("ix_processes_process_type_id");
+
+                    b.ToTable("processes", "portal");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.ProcessStep<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("DateCreated")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_created");
+
+                    b.Property<DateTimeOffset?>("DateLastChanged")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date_last_changed");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<Guid>("ProcessId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("process_id");
+
+                    b.Property<int>("ProcessStepStatusId")
+                        .HasColumnType("integer")
+                        .HasColumnName("process_step_status_id");
+
+                    b.Property<int>("ProcessStepTypeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("process_step_type_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_process_steps");
+
+                    b.HasIndex("ProcessId")
+                        .HasDatabaseName("ix_process_steps_process_id");
+
+                    b.HasIndex("ProcessStepStatusId")
+                        .HasDatabaseName("ix_process_steps_process_step_status_id");
+
+                    b.HasIndex("ProcessStepTypeId")
+                        .HasDatabaseName("ix_process_steps_process_step_type_id");
+
+                    b.ToTable("process_steps", "portal");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.ProcessStepStatus<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("label");
+
+                    b.HasKey("Id")
+                        .HasName("pk_process_step_statuses");
+
+                    b.ToTable("process_step_statuses", "portal");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Label = "TODO"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Label = "DONE"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Label = "SKIPPED"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Label = "FAILED"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Label = "DUPLICATE"
+                        });
+                });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.AuditEntities.AuditAppSubscriptionDetail20221118", b =>
                 {
@@ -2744,8 +2864,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_app_subscription_detail20231115\" (\"id\", \"offer_subscription_id\", \"app_instance_id\", \"app_subscription_url\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"offer_subscription_id\", \r\n  NEW.\"app_instance_id\", \r\n  NEW.\"app_subscription_url\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL AFTER INSERT\r\nON \"portal\".\"app_subscription_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_app_subscription_detail20231115\" (\"id\", \"offer_subscription_id\", \"app_instance_id\", \"app_subscription_url\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"offer_subscription_id\", \r\n  NEW.\"app_instance_id\", \r\n  NEW.\"app_subscription_url\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL AFTER UPDATE\r\nON \"portal\".\"app_subscription_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_app_subscription_detail20231115\" (\"id\", \"offer_subscription_id\", \"app_instance_id\", \"app_subscription_url\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"offer_subscription_id\", \r\n  NEW.\"app_instance_id\", \r\n  NEW.\"app_subscription_url\", \r\n  NEW.\"last_editor_id\", \r\n  45f98772-362d-45ab-a481-ff310b37d4cc, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL AFTER INSERT\r\nON \"portal\".\"app_subscription_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_APPSUBSCRIPTIONDETAIL\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_app_subscription_detail20231115\" (\"id\", \"offer_subscription_id\", \"app_instance_id\", \"app_subscription_url\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"offer_subscription_id\", \r\n  NEW.\"app_instance_id\", \r\n  NEW.\"app_subscription_url\", \r\n  NEW.\"last_editor_id\", \r\n  8750a93e-816a-4a49-bbad-342d03382256, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL AFTER UPDATE\r\nON \"portal\".\"app_subscription_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_APPSUBSCRIPTIONDETAIL\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ApplicationChecklistEntry", b =>
@@ -3158,7 +3278,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasDatabaseName("ix_company_applications_application_status_id");
 
                     b.HasIndex("ChecklistProcessId")
-                        .IsUnique()
                         .HasDatabaseName("ix_company_applications_checklist_process_id");
 
                     b.HasIndex("CompanyApplicationTypeId")
@@ -3181,8 +3300,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_application20231115\" (\"id\", \"date_created\", \"date_last_changed\", \"application_status_id\", \"company_id\", \"checklist_process_id\", \"company_application_type_id\", \"onboarding_service_provider_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"application_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"checklist_process_id\", \r\n  NEW.\"company_application_type_id\", \r\n  NEW.\"onboarding_service_provider_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION AFTER INSERT\r\nON \"portal\".\"company_applications\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_application20231115\" (\"id\", \"date_created\", \"date_last_changed\", \"application_status_id\", \"company_id\", \"checklist_process_id\", \"company_application_type_id\", \"onboarding_service_provider_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"application_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"checklist_process_id\", \r\n  NEW.\"company_application_type_id\", \r\n  NEW.\"onboarding_service_provider_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION AFTER UPDATE\r\nON \"portal\".\"company_applications\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_application20231115\" (\"id\", \"date_created\", \"date_last_changed\", \"application_status_id\", \"company_id\", \"checklist_process_id\", \"company_application_type_id\", \"onboarding_service_provider_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"application_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"checklist_process_id\", \r\n  NEW.\"company_application_type_id\", \r\n  NEW.\"onboarding_service_provider_id\", \r\n  NEW.\"last_editor_id\", \r\n  cabed4a1-6a07-4817-91fd-c5da7dbf2e67, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION AFTER INSERT\r\nON \"portal\".\"company_applications\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYAPPLICATION\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_application20231115\" (\"id\", \"date_created\", \"date_last_changed\", \"application_status_id\", \"company_id\", \"checklist_process_id\", \"company_application_type_id\", \"onboarding_service_provider_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"application_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"checklist_process_id\", \r\n  NEW.\"company_application_type_id\", \r\n  NEW.\"onboarding_service_provider_id\", \r\n  NEW.\"last_editor_id\", \r\n  394ee18e-3a0c-4af6-baa4-1dfbbb00589c, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION AFTER UPDATE\r\nON \"portal\".\"company_applications\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYAPPLICATION\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyApplicationStatus", b =>
@@ -3316,8 +3435,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_assigned_role2023316\" (\"company_id\", \"company_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"company_id\", \r\n  NEW.\"company_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE AFTER INSERT\r\nON \"portal\".\"company_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_assigned_role2023316\" (\"company_id\", \"company_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"company_id\", \r\n  NEW.\"company_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE AFTER UPDATE\r\nON \"portal\".\"company_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_assigned_role2023316\" (\"company_id\", \"company_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"company_id\", \r\n  NEW.\"company_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  b42ba0f6-8162-4c9a-8d9d-0cea2c327660, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE AFTER INSERT\r\nON \"portal\".\"company_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYASSIGNEDROLE\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_assigned_role2023316\" (\"company_id\", \"company_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"company_id\", \r\n  NEW.\"company_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  0fea98e6-3b3f-4f59-9348-b297375c5fe1, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE AFTER UPDATE\r\nON \"portal\".\"company_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYASSIGNEDROLE\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyAssignedUseCase", b =>
@@ -3417,8 +3536,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_certificate_management20240416\" (\"id\", \"valid_from\", \"valid_till\", \"company_certificate_type_id\", \"company_certificate_status_id\", \"company_id\", \"document_id\", \"external_certificate_number\", \"issuer\", \"trust_level\", \"validator\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"valid_from\", \r\n  NEW.\"valid_till\", \r\n  NEW.\"company_certificate_type_id\", \r\n  NEW.\"company_certificate_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"external_certificate_number\", \r\n  NEW.\"issuer\", \r\n  NEW.\"trust_level\", \r\n  NEW.\"validator\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE AFTER INSERT\r\nON \"portal\".\"company_certificates\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_certificate_management20240416\" (\"id\", \"valid_from\", \"valid_till\", \"company_certificate_type_id\", \"company_certificate_status_id\", \"company_id\", \"document_id\", \"external_certificate_number\", \"issuer\", \"trust_level\", \"validator\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"valid_from\", \r\n  NEW.\"valid_till\", \r\n  NEW.\"company_certificate_type_id\", \r\n  NEW.\"company_certificate_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"external_certificate_number\", \r\n  NEW.\"issuer\", \r\n  NEW.\"trust_level\", \r\n  NEW.\"validator\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE AFTER UPDATE\r\nON \"portal\".\"company_certificates\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_certificate_management20240416\" (\"id\", \"valid_from\", \"valid_till\", \"company_certificate_type_id\", \"company_certificate_status_id\", \"company_id\", \"document_id\", \"external_certificate_number\", \"issuer\", \"trust_level\", \"validator\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"valid_from\", \r\n  NEW.\"valid_till\", \r\n  NEW.\"company_certificate_type_id\", \r\n  NEW.\"company_certificate_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"external_certificate_number\", \r\n  NEW.\"issuer\", \r\n  NEW.\"trust_level\", \r\n  NEW.\"validator\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  5f6eb816-bda0-42dc-bc95-85a380592ab6, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE AFTER INSERT\r\nON \"portal\".\"company_certificates\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYCERTIFICATE\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_certificate_management20240416\" (\"id\", \"valid_from\", \"valid_till\", \"company_certificate_type_id\", \"company_certificate_status_id\", \"company_id\", \"document_id\", \"external_certificate_number\", \"issuer\", \"trust_level\", \"validator\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"valid_from\", \r\n  NEW.\"valid_till\", \r\n  NEW.\"company_certificate_type_id\", \r\n  NEW.\"company_certificate_status_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"external_certificate_number\", \r\n  NEW.\"issuer\", \r\n  NEW.\"trust_level\", \r\n  NEW.\"validator\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  c4829ce1-f314-4c93-a9a8-72d16aeef8cd, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE AFTER UPDATE\r\nON \"portal\".\"company_certificates\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYCERTIFICATE\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyCertificateAssignedSite", b =>
@@ -3935,8 +4054,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYUSER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYUSER\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYUSER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_user20230523\" (\"id\", \"email\", \"firstname\", \"lastlogin\", \"lastname\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"email\", \r\n  NEW.\"firstname\", \r\n  NEW.\"lastlogin\", \r\n  NEW.\"lastname\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYUSER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYUSER AFTER INSERT\r\nON \"portal\".\"company_users\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYUSER\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYUSER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYUSER\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYUSER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_user20230523\" (\"id\", \"email\", \"firstname\", \"lastlogin\", \"lastname\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"email\", \r\n  NEW.\"firstname\", \r\n  NEW.\"lastlogin\", \r\n  NEW.\"lastname\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYUSER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYUSER AFTER UPDATE\r\nON \"portal\".\"company_users\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYUSER\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_COMPANYUSER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYUSER\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_COMPANYUSER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_user20230523\" (\"id\", \"email\", \"firstname\", \"lastlogin\", \"lastname\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"email\", \r\n  NEW.\"firstname\", \r\n  NEW.\"lastlogin\", \r\n  NEW.\"lastname\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  bba20d74-58bc-4723-87d6-61a5081dd0c5, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_COMPANYUSER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_COMPANYUSER AFTER INSERT\r\nON \"portal\".\"company_users\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_COMPANYUSER\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_COMPANYUSER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYUSER\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_COMPANYUSER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_company_user20230523\" (\"id\", \"email\", \"firstname\", \"lastlogin\", \"lastname\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"email\", \r\n  NEW.\"firstname\", \r\n  NEW.\"lastlogin\", \r\n  NEW.\"lastname\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  8cae0b48-13ce-4c8e-be1a-06d39e08c404, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_COMPANYUSER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_COMPANYUSER AFTER UPDATE\r\nON \"portal\".\"company_users\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_COMPANYUSER\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyUserAssignedAppFavourite", b =>
@@ -4022,7 +4141,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasDatabaseName("ix_company_user_assigned_processes_company_user_id");
 
                     b.HasIndex("ProcessId")
-                        .IsUnique()
                         .HasDatabaseName("ix_company_user_assigned_processes_process_id");
 
                     b.ToTable("company_user_assigned_processes", "portal");
@@ -4188,8 +4306,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_CONNECTOR", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONNECTOR\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_CONNECTOR$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_connector20241008\" (\"id\", \"name\", \"connector_url\", \"type_id\", \"status_id\", \"provider_id\", \"host_id\", \"self_description_document_id\", \"location_id\", \"self_description_message\", \"date_last_changed\", \"technical_user_id\", \"sd_creation_process_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"connector_url\", \r\n  NEW.\"type_id\", \r\n  NEW.\"status_id\", \r\n  NEW.\"provider_id\", \r\n  NEW.\"host_id\", \r\n  NEW.\"self_description_document_id\", \r\n  NEW.\"location_id\", \r\n  NEW.\"self_description_message\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"technical_user_id\", \r\n  NEW.\"sd_creation_process_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_CONNECTOR$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_CONNECTOR AFTER INSERT\r\nON \"portal\".\"connectors\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONNECTOR\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_CONNECTOR", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONNECTOR\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_CONNECTOR$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_connector20241008\" (\"id\", \"name\", \"connector_url\", \"type_id\", \"status_id\", \"provider_id\", \"host_id\", \"self_description_document_id\", \"location_id\", \"self_description_message\", \"date_last_changed\", \"technical_user_id\", \"sd_creation_process_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"connector_url\", \r\n  NEW.\"type_id\", \r\n  NEW.\"status_id\", \r\n  NEW.\"provider_id\", \r\n  NEW.\"host_id\", \r\n  NEW.\"self_description_document_id\", \r\n  NEW.\"location_id\", \r\n  NEW.\"self_description_message\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"technical_user_id\", \r\n  NEW.\"sd_creation_process_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_CONNECTOR$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_CONNECTOR AFTER UPDATE\r\nON \"portal\".\"connectors\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONNECTOR\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_CONNECTOR", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONNECTOR\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_CONNECTOR$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_connector20241008\" (\"id\", \"name\", \"connector_url\", \"type_id\", \"status_id\", \"provider_id\", \"host_id\", \"self_description_document_id\", \"location_id\", \"self_description_message\", \"date_last_changed\", \"technical_user_id\", \"sd_creation_process_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"connector_url\", \r\n  NEW.\"type_id\", \r\n  NEW.\"status_id\", \r\n  NEW.\"provider_id\", \r\n  NEW.\"host_id\", \r\n  NEW.\"self_description_document_id\", \r\n  NEW.\"location_id\", \r\n  NEW.\"self_description_message\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"technical_user_id\", \r\n  NEW.\"sd_creation_process_id\", \r\n  NEW.\"last_editor_id\", \r\n  e6c2acc2-29e7-4228-b81b-660665c4fbe4, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_CONNECTOR$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_CONNECTOR AFTER INSERT\r\nON \"portal\".\"connectors\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONNECTOR\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_CONNECTOR", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONNECTOR\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_CONNECTOR$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_connector20241008\" (\"id\", \"name\", \"connector_url\", \"type_id\", \"status_id\", \"provider_id\", \"host_id\", \"self_description_document_id\", \"location_id\", \"self_description_message\", \"date_last_changed\", \"technical_user_id\", \"sd_creation_process_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"connector_url\", \r\n  NEW.\"type_id\", \r\n  NEW.\"status_id\", \r\n  NEW.\"provider_id\", \r\n  NEW.\"host_id\", \r\n  NEW.\"self_description_document_id\", \r\n  NEW.\"location_id\", \r\n  NEW.\"self_description_message\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"technical_user_id\", \r\n  NEW.\"sd_creation_process_id\", \r\n  NEW.\"last_editor_id\", \r\n  31e93234-4f73-44c9-b37f-3dc3ea438542, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_CONNECTOR$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_CONNECTOR AFTER UPDATE\r\nON \"portal\".\"connectors\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONNECTOR\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ConnectorAssignedOfferSubscription", b =>
@@ -4350,8 +4468,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_CONSENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONSENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_CONSENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_consent20231115\" (\"id\", \"date_created\", \"comment\", \"consent_status_id\", \"target\", \"agreement_id\", \"company_id\", \"document_id\", \"company_user_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"comment\", \r\n  NEW.\"consent_status_id\", \r\n  NEW.\"target\", \r\n  NEW.\"agreement_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_CONSENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_CONSENT AFTER INSERT\r\nON \"portal\".\"consents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONSENT\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_CONSENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONSENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_CONSENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_consent20231115\" (\"id\", \"date_created\", \"comment\", \"consent_status_id\", \"target\", \"agreement_id\", \"company_id\", \"document_id\", \"company_user_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"comment\", \r\n  NEW.\"consent_status_id\", \r\n  NEW.\"target\", \r\n  NEW.\"agreement_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_CONSENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_CONSENT AFTER UPDATE\r\nON \"portal\".\"consents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONSENT\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_CONSENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONSENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_CONSENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_consent20231115\" (\"id\", \"date_created\", \"comment\", \"consent_status_id\", \"target\", \"agreement_id\", \"company_id\", \"document_id\", \"company_user_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"comment\", \r\n  NEW.\"consent_status_id\", \r\n  NEW.\"target\", \r\n  NEW.\"agreement_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"last_editor_id\", \r\n  91bdd200-c769-4726-98d1-45f5bd8bb9b9, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_CONSENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_CONSENT AFTER INSERT\r\nON \"portal\".\"consents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_CONSENT\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_CONSENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONSENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_CONSENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_consent20231115\" (\"id\", \"date_created\", \"comment\", \"consent_status_id\", \"target\", \"agreement_id\", \"company_id\", \"document_id\", \"company_user_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"comment\", \r\n  NEW.\"consent_status_id\", \r\n  NEW.\"target\", \r\n  NEW.\"agreement_id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"document_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"last_editor_id\", \r\n  9095d3c8-6725-4975-898c-bbf35f7cbe41, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_CONSENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_CONSENT AFTER UPDATE\r\nON \"portal\".\"consents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_CONSENT\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ConsentAssignedOffer", b =>
@@ -4573,8 +4691,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_DOCUMENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_DOCUMENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_DOCUMENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_document20231115\" (\"id\", \"date_created\", \"document_hash\", \"document_content\", \"document_name\", \"media_type_id\", \"document_type_id\", \"document_status_id\", \"company_user_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"document_hash\", \r\n  NEW.\"document_content\", \r\n  NEW.\"document_name\", \r\n  NEW.\"media_type_id\", \r\n  NEW.\"document_type_id\", \r\n  NEW.\"document_status_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_DOCUMENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_DOCUMENT AFTER INSERT\r\nON \"portal\".\"documents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_DOCUMENT\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_DOCUMENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_DOCUMENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_DOCUMENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_document20231115\" (\"id\", \"date_created\", \"document_hash\", \"document_content\", \"document_name\", \"media_type_id\", \"document_type_id\", \"document_status_id\", \"company_user_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"document_hash\", \r\n  NEW.\"document_content\", \r\n  NEW.\"document_name\", \r\n  NEW.\"media_type_id\", \r\n  NEW.\"document_type_id\", \r\n  NEW.\"document_status_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_DOCUMENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_DOCUMENT AFTER UPDATE\r\nON \"portal\".\"documents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_DOCUMENT\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_DOCUMENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_DOCUMENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_DOCUMENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_document20231115\" (\"id\", \"date_created\", \"document_hash\", \"document_content\", \"document_name\", \"media_type_id\", \"document_type_id\", \"document_status_id\", \"company_user_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"document_hash\", \r\n  NEW.\"document_content\", \r\n  NEW.\"document_name\", \r\n  NEW.\"media_type_id\", \r\n  NEW.\"document_type_id\", \r\n  NEW.\"document_status_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  b2d3b187-dba3-417d-bd3e-431892c845e7, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_DOCUMENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_DOCUMENT AFTER INSERT\r\nON \"portal\".\"documents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_DOCUMENT\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_DOCUMENT", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_DOCUMENT\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_DOCUMENT$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_document20231115\" (\"id\", \"date_created\", \"document_hash\", \"document_content\", \"document_name\", \"media_type_id\", \"document_type_id\", \"document_status_id\", \"company_user_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"document_hash\", \r\n  NEW.\"document_content\", \r\n  NEW.\"document_name\", \r\n  NEW.\"media_type_id\", \r\n  NEW.\"document_type_id\", \r\n  NEW.\"document_status_id\", \r\n  NEW.\"company_user_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  3b3150f5-f4f3-4c1a-826b-6e48cdbd8e9a, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_DOCUMENT$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_DOCUMENT AFTER UPDATE\r\nON \"portal\".\"documents\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_DOCUMENT\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.DocumentStatus", b =>
@@ -4878,8 +4996,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_IDENTITY", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITY\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_IDENTITY$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity20231115\" (\"id\", \"date_created\", \"company_id\", \"user_status_id\", \"user_entity_id\", \"identity_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"company_id\", \r\n  NEW.\"user_status_id\", \r\n  NEW.\"user_entity_id\", \r\n  NEW.\"identity_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_IDENTITY$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_IDENTITY AFTER INSERT\r\nON \"portal\".\"identities\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITY\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_IDENTITY", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITY\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_IDENTITY$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity20231115\" (\"id\", \"date_created\", \"company_id\", \"user_status_id\", \"user_entity_id\", \"identity_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"company_id\", \r\n  NEW.\"user_status_id\", \r\n  NEW.\"user_entity_id\", \r\n  NEW.\"identity_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_IDENTITY$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_IDENTITY AFTER UPDATE\r\nON \"portal\".\"identities\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITY\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_IDENTITY", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITY\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_IDENTITY$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity20231115\" (\"id\", \"date_created\", \"company_id\", \"user_status_id\", \"user_entity_id\", \"identity_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"company_id\", \r\n  NEW.\"user_status_id\", \r\n  NEW.\"user_entity_id\", \r\n  NEW.\"identity_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  547b1934-910a-44ba-ac8f-73e4cde17f5a, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_IDENTITY$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_IDENTITY AFTER INSERT\r\nON \"portal\".\"identities\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITY\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_IDENTITY", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITY\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_IDENTITY$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity20231115\" (\"id\", \"date_created\", \"company_id\", \"user_status_id\", \"user_entity_id\", \"identity_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"company_id\", \r\n  NEW.\"user_status_id\", \r\n  NEW.\"user_entity_id\", \r\n  NEW.\"identity_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  4cc51c08-5657-4e70-acc2-f65e5bd4ff79, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_IDENTITY$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_IDENTITY AFTER UPDATE\r\nON \"portal\".\"identities\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITY\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.IdentityAssignedRole", b =>
@@ -4913,8 +5031,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity_assigned_role20230522\" (\"identity_id\", \"user_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"identity_id\", \r\n  NEW.\"user_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE AFTER INSERT\r\nON \"portal\".\"identity_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity_assigned_role20230522\" (\"identity_id\", \"user_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"identity_id\", \r\n  NEW.\"user_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE AFTER UPDATE\r\nON \"portal\".\"identity_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity_assigned_role20230522\" (\"identity_id\", \"user_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"identity_id\", \r\n  NEW.\"user_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  1c39e766-360a-4646-80b3-738a1c11f06d, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE AFTER INSERT\r\nON \"portal\".\"identity_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_IDENTITYASSIGNEDROLE\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_identity_assigned_role20230522\" (\"identity_id\", \"user_role_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"identity_id\", \r\n  NEW.\"user_role_id\", \r\n  NEW.\"last_editor_id\", \r\n  3d57c218-46b6-4d4a-93c7-25c97f295afb, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE AFTER UPDATE\r\nON \"portal\".\"identity_assigned_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_IDENTITYASSIGNEDROLE\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.IdentityProvider", b =>
@@ -4973,7 +5091,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasDatabaseName("ix_identity_provider_assigned_processes_identity_provider_id");
 
                     b.HasIndex("ProcessId")
-                        .IsUnique()
                         .HasDatabaseName("ix_identity_provider_assigned_processes_process_id");
 
                     b.ToTable("identity_provider_assigned_processes", "portal");
@@ -5837,8 +5954,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_OFFER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFER\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_OFFER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer20240911\" (\"id\", \"name\", \"date_created\", \"date_released\", \"marketing_url\", \"contact_email\", \"contact_number\", \"offer_type_id\", \"sales_manager_id\", \"provider_company_id\", \"offer_status_id\", \"license_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_released\", \r\n  NEW.\"marketing_url\", \r\n  NEW.\"contact_email\", \r\n  NEW.\"contact_number\", \r\n  NEW.\"offer_type_id\", \r\n  NEW.\"sales_manager_id\", \r\n  NEW.\"provider_company_id\", \r\n  NEW.\"offer_status_id\", \r\n  NEW.\"license_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_OFFER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_OFFER AFTER INSERT\r\nON \"portal\".\"offers\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFER\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_OFFER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFER\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_OFFER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer20240911\" (\"id\", \"name\", \"date_created\", \"date_released\", \"marketing_url\", \"contact_email\", \"contact_number\", \"offer_type_id\", \"sales_manager_id\", \"provider_company_id\", \"offer_status_id\", \"license_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_released\", \r\n  NEW.\"marketing_url\", \r\n  NEW.\"contact_email\", \r\n  NEW.\"contact_number\", \r\n  NEW.\"offer_type_id\", \r\n  NEW.\"sales_manager_id\", \r\n  NEW.\"provider_company_id\", \r\n  NEW.\"offer_status_id\", \r\n  NEW.\"license_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_OFFER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_OFFER AFTER UPDATE\r\nON \"portal\".\"offers\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFER\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_OFFER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFER\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_OFFER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer20240911\" (\"id\", \"name\", \"date_created\", \"date_released\", \"marketing_url\", \"contact_email\", \"contact_number\", \"offer_type_id\", \"sales_manager_id\", \"provider_company_id\", \"offer_status_id\", \"license_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_released\", \r\n  NEW.\"marketing_url\", \r\n  NEW.\"contact_email\", \r\n  NEW.\"contact_number\", \r\n  NEW.\"offer_type_id\", \r\n  NEW.\"sales_manager_id\", \r\n  NEW.\"provider_company_id\", \r\n  NEW.\"offer_status_id\", \r\n  NEW.\"license_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  15500235-c891-4ef1-b8f2-78765f5ae8a0, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_OFFER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_OFFER AFTER INSERT\r\nON \"portal\".\"offers\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFER\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_OFFER", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFER\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_OFFER$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer20240911\" (\"id\", \"name\", \"date_created\", \"date_released\", \"marketing_url\", \"contact_email\", \"contact_number\", \"offer_type_id\", \"sales_manager_id\", \"provider_company_id\", \"offer_status_id\", \"license_type_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"name\", \r\n  NEW.\"date_created\", \r\n  NEW.\"date_released\", \r\n  NEW.\"marketing_url\", \r\n  NEW.\"contact_email\", \r\n  NEW.\"contact_number\", \r\n  NEW.\"offer_type_id\", \r\n  NEW.\"sales_manager_id\", \r\n  NEW.\"provider_company_id\", \r\n  NEW.\"offer_status_id\", \r\n  NEW.\"license_type_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  3f26a6b9-8da8-46a9-9443-7bbd637cc576, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_OFFER$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_OFFER AFTER UPDATE\r\nON \"portal\".\"offers\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFER\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.OfferAssignedDocument", b =>
@@ -6052,7 +6169,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasDatabaseName("ix_offer_subscriptions_offer_subscription_status_id");
 
                     b.HasIndex("ProcessId")
-                        .IsUnique()
                         .HasDatabaseName("ix_offer_subscriptions_process_id");
 
                     b.HasIndex("RequesterId")
@@ -6066,8 +6182,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer_subscription20231115\" (\"id\", \"company_id\", \"offer_id\", \"offer_subscription_status_id\", \"display_name\", \"description\", \"requester_id\", \"last_editor_id\", \"process_id\", \"date_created\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"offer_subscription_status_id\", \r\n  NEW.\"display_name\", \r\n  NEW.\"description\", \r\n  NEW.\"requester_id\", \r\n  NEW.\"last_editor_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"date_created\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION AFTER INSERT\r\nON \"portal\".\"offer_subscriptions\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer_subscription20231115\" (\"id\", \"company_id\", \"offer_id\", \"offer_subscription_status_id\", \"display_name\", \"description\", \"requester_id\", \"last_editor_id\", \"process_id\", \"date_created\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"offer_subscription_status_id\", \r\n  NEW.\"display_name\", \r\n  NEW.\"description\", \r\n  NEW.\"requester_id\", \r\n  NEW.\"last_editor_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"date_created\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION AFTER UPDATE\r\nON \"portal\".\"offer_subscriptions\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer_subscription20231115\" (\"id\", \"company_id\", \"offer_id\", \"offer_subscription_status_id\", \"display_name\", \"description\", \"requester_id\", \"last_editor_id\", \"process_id\", \"date_created\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"offer_subscription_status_id\", \r\n  NEW.\"display_name\", \r\n  NEW.\"description\", \r\n  NEW.\"requester_id\", \r\n  NEW.\"last_editor_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"date_created\", \r\n  eb29735a-9efe-4b05-8197-1a2039fe8a3c, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION AFTER INSERT\r\nON \"portal\".\"offer_subscriptions\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_OFFERSUBSCRIPTION\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_offer_subscription20231115\" (\"id\", \"company_id\", \"offer_id\", \"offer_subscription_status_id\", \"display_name\", \"description\", \"requester_id\", \"last_editor_id\", \"process_id\", \"date_created\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"company_id\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"offer_subscription_status_id\", \r\n  NEW.\"display_name\", \r\n  NEW.\"description\", \r\n  NEW.\"requester_id\", \r\n  NEW.\"last_editor_id\", \r\n  NEW.\"process_id\", \r\n  NEW.\"date_created\", \r\n  a24e58ee-e2ef-44af-97a3-169a744b9fea, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION AFTER UPDATE\r\nON \"portal\".\"offer_subscriptions\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_OFFERSUBSCRIPTION\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.OfferSubscriptionProcessData", b =>
@@ -6275,126 +6391,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         {
                             Id = 5,
                             Label = "NONE"
-                        });
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset?>("LockExpiryDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("lock_expiry_date");
-
-                    b.Property<int>("ProcessTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("process_type_id");
-
-                    b.Property<Guid>("Version")
-                        .IsConcurrencyToken()
-                        .HasColumnType("uuid")
-                        .HasColumnName("version");
-
-                    b.HasKey("Id")
-                        .HasName("pk_processes");
-
-                    b.HasIndex("ProcessTypeId")
-                        .HasDatabaseName("ix_processes_process_type_id");
-
-                    b.ToTable("processes", "portal");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStep", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<DateTimeOffset>("DateCreated")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_created");
-
-                    b.Property<DateTimeOffset?>("DateLastChanged")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date_last_changed");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("text")
-                        .HasColumnName("message");
-
-                    b.Property<Guid>("ProcessId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("process_id");
-
-                    b.Property<int>("ProcessStepStatusId")
-                        .HasColumnType("integer")
-                        .HasColumnName("process_step_status_id");
-
-                    b.Property<int>("ProcessStepTypeId")
-                        .HasColumnType("integer")
-                        .HasColumnName("process_step_type_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_process_steps");
-
-                    b.HasIndex("ProcessId")
-                        .HasDatabaseName("ix_process_steps_process_id");
-
-                    b.HasIndex("ProcessStepStatusId")
-                        .HasDatabaseName("ix_process_steps_process_step_status_id");
-
-                    b.HasIndex("ProcessStepTypeId")
-                        .HasDatabaseName("ix_process_steps_process_step_type_id");
-
-                    b.ToTable("process_steps", "portal");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepStatus", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("label");
-
-                    b.HasKey("Id")
-                        .HasName("pk_process_step_statuses");
-
-                    b.ToTable("process_step_statuses", "portal");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Label = "TODO"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Label = "DONE"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Label = "SKIPPED"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Label = "FAILED"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Label = "DUPLICATE"
                         });
                 });
 
@@ -7078,8 +7074,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_provider_company_detail20231115\" (\"id\", \"date_created\", \"auto_setup_url\", \"auto_setup_callback_url\", \"company_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"auto_setup_url\", \r\n  NEW.\"auto_setup_callback_url\", \r\n  NEW.\"company_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL AFTER INSERT\r\nON \"portal\".\"provider_company_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_provider_company_detail20231115\" (\"id\", \"date_created\", \"auto_setup_url\", \"auto_setup_callback_url\", \"company_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"auto_setup_url\", \r\n  NEW.\"auto_setup_callback_url\", \r\n  NEW.\"company_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL AFTER UPDATE\r\nON \"portal\".\"provider_company_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_provider_company_detail20231115\" (\"id\", \"date_created\", \"auto_setup_url\", \"auto_setup_callback_url\", \"company_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"auto_setup_url\", \r\n  NEW.\"auto_setup_callback_url\", \r\n  NEW.\"company_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  3547f08a-80a4-4883-9698-50ee455718d7, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL AFTER INSERT\r\nON \"portal\".\"provider_company_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_PROVIDERCOMPANYDETAIL\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_provider_company_detail20231115\" (\"id\", \"date_created\", \"auto_setup_url\", \"auto_setup_callback_url\", \"company_id\", \"date_last_changed\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"date_created\", \r\n  NEW.\"auto_setup_url\", \r\n  NEW.\"auto_setup_callback_url\", \r\n  NEW.\"company_id\", \r\n  NEW.\"date_last_changed\", \r\n  NEW.\"last_editor_id\", \r\n  760980d9-2553-4da8-996a-929d1252aabf, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL AFTER UPDATE\r\nON \"portal\".\"provider_company_details\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_PROVIDERCOMPANYDETAIL\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ServiceDetail", b =>
@@ -7422,8 +7418,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         });
 
                     b
-                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_USERROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_USERROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_USERROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_user_role20231115\" (\"id\", \"user_role\", \"offer_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"user_role\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  1, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_USERROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_USERROLE AFTER INSERT\r\nON \"portal\".\"user_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_USERROLE\"();")
-                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_USERROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_USERROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_USERROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_user_role20231115\" (\"id\", \"user_role\", \"offer_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"user_role\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"last_editor_id\", \r\n  gen_random_uuid(), \r\n  2, \r\n  CURRENT_TIMESTAMP, \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_USERROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_USERROLE AFTER UPDATE\r\nON \"portal\".\"user_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_USERROLE\"();");
+                        .HasAnnotation("LC_TRIGGER_AFTER_INSERT_USERROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_INSERT_USERROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_INSERT_USERROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_user_role20231115\" (\"id\", \"user_role\", \"offer_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"user_role\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"last_editor_id\", \r\n  af880ec0-fcb8-4c33-b818-9e1b5af2eb97, \r\n  1, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_INSERT_USERROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_INSERT_USERROLE AFTER INSERT\r\nON \"portal\".\"user_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_INSERT_USERROLE\"();")
+                        .HasAnnotation("LC_TRIGGER_AFTER_UPDATE_USERROLE", "CREATE FUNCTION \"portal\".\"LC_TRIGGER_AFTER_UPDATE_USERROLE\"() RETURNS trigger as $LC_TRIGGER_AFTER_UPDATE_USERROLE$\r\nBEGIN\r\n  INSERT INTO \"portal\".\"audit_user_role20231115\" (\"id\", \"user_role\", \"offer_id\", \"last_editor_id\", \"audit_v1id\", \"audit_v1operation_id\", \"audit_v1date_last_changed\", \"audit_v1last_editor_id\") SELECT NEW.\"id\", \r\n  NEW.\"user_role\", \r\n  NEW.\"offer_id\", \r\n  NEW.\"last_editor_id\", \r\n  da98eb4d-2fe7-4e47-82bf-2591e928bb94, \r\n  2, \r\n  '0001-01-01', \r\n  NEW.\"last_editor_id\";\r\nRETURN NEW;\r\nEND;\r\n$LC_TRIGGER_AFTER_UPDATE_USERROLE$ LANGUAGE plpgsql;\r\nCREATE TRIGGER LC_TRIGGER_AFTER_UPDATE_USERROLE AFTER UPDATE\r\nON \"portal\".\"user_roles\"\r\nFOR EACH ROW EXECUTE PROCEDURE \"portal\".\"LC_TRIGGER_AFTER_UPDATE_USERROLE\"();");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.UserRoleAssignedCollection", b =>
@@ -7695,6 +7691,41 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                     b.ToView("offer_subscription_view", "portal");
                 });
 
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessType", null)
+                        .WithMany("Processes")
+                        .HasForeignKey("ProcessTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_processes_process_types_process_type_id");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.ProcessStep<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithMany("ProcessSteps")
+                        .HasForeignKey("ProcessId")
+                        .IsRequired()
+                        .HasConstraintName("fk_process_steps_processes_process_id");
+
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.ProcessStepStatus<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", null)
+                        .WithMany("ProcessSteps")
+                        .HasForeignKey("ProcessStepStatusId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_process_steps_process_step_statuses_process_step_status_id");
+
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepType", null)
+                        .WithMany("ProcessSteps")
+                        .HasForeignKey("ProcessStepTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_process_steps_process_step_types_process_step_type_id");
+
+                    b.Navigation("Process");
+                });
+
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Address", b =>
                 {
                     b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Country", "Country")
@@ -7961,8 +7992,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_companies_company_statuses_company_status_id");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "SdCreationProcess")
-                        .WithOne("SdCreationCompany")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "SdCreationProcess")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Company", "SdCreationProcessId")
                         .HasConstraintName("fk_companies_processes_sd_creation_process_id");
 
@@ -7989,9 +8020,9 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_company_applications_company_application_statuses_applicati");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "ChecklistProcess")
-                        .WithOne("CompanyApplication")
-                        .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyApplication", "ChecklistProcessId")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "ChecklistProcess")
+                        .WithMany()
+                        .HasForeignKey("ChecklistProcessId")
                         .HasConstraintName("fk_company_applications_processes_checklist_process_id");
 
                     b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyApplicationType", "CompanyApplicationType")
@@ -8212,8 +8243,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_company_invitations_company_applications_application_id");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("CompanyInvitation")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyInvitation", "ProcessId")
                         .IsRequired()
                         .HasConstraintName("fk_company_invitations_processes_process_id");
@@ -8357,9 +8388,9 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_company_user_assigned_processes_company_users_company_user_");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("CompanyUserAssignedProcess")
-                        .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyUserAssignedProcess", "ProcessId")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithMany()
+                        .HasForeignKey("ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_company_user_assigned_processes_processes_process_id");
@@ -8407,8 +8438,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_connectors_companies_provider_id");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "SdCreationProcess")
-                        .WithOne("SdCreationConnector")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "SdCreationProcess")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Connector", "SdCreationProcessId")
                         .HasConstraintName("fk_connectors_processes_sd_creation_process_id");
 
@@ -8655,8 +8686,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ExternalTechnicalUserCreationData", b =>
                 {
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("ExternalTechnicalUserCreationData")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ExternalTechnicalUserCreationData", "ProcessId")
                         .IsRequired()
                         .HasConstraintName("fk_external_technical_user_creation_data_processes_process_id");
@@ -8779,9 +8810,9 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_identity_provider_assigned_processes_identity_providers_ide");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("IdentityProviderAssignedProcess")
-                        .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.IdentityProviderAssignedProcess", "ProcessId")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithMany()
+                        .HasForeignKey("ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_identity_provider_assigned_processes_processes_process_id");
@@ -8846,8 +8877,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_mailing_informations_mailing_statuses_mailing_status_id");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("MailingInformation")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.MailingInformation", "ProcessId")
                         .IsRequired()
                         .HasConstraintName("fk_mailing_informations_processes_process_id");
@@ -8879,8 +8910,8 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_network_registrations_companies_onboarding_service_provider");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("NetworkRegistration")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithOne()
                         .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.NetworkRegistration", "ProcessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -9094,9 +9125,9 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .IsRequired()
                         .HasConstraintName("fk_offer_subscriptions_offer_subscription_statuses_offer_subsc");
 
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithOne("OfferSubscription")
-                        .HasForeignKey("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.OfferSubscription", "ProcessId")
+                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", "Process")
+                        .WithMany()
+                        .HasForeignKey("ProcessId")
                         .HasConstraintName("fk_offer_subscriptions_processes_process_id");
 
                     b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.CompanyUser", "Requester")
@@ -9150,46 +9181,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasConstraintName("fk_onboarding_service_provider_details_companies_company_id");
 
                     b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", b =>
-                {
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessType", "ProcessType")
-                        .WithMany("Processes")
-                        .HasForeignKey("ProcessTypeId")
-                        .IsRequired()
-                        .HasConstraintName("fk_processes_process_types_process_type_id");
-
-                    b.Navigation("ProcessType");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStep", b =>
-                {
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", "Process")
-                        .WithMany("ProcessSteps")
-                        .HasForeignKey("ProcessId")
-                        .IsRequired()
-                        .HasConstraintName("fk_process_steps_processes_process_id");
-
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepStatus", "ProcessStepStatus")
-                        .WithMany("ProcessSteps")
-                        .HasForeignKey("ProcessStepStatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_process_steps_process_step_statuses_process_step_status_id");
-
-                    b.HasOne("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepType", "ProcessStepType")
-                        .WithMany("ProcessSteps")
-                        .HasForeignKey("ProcessStepTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_process_steps_process_step_types_process_step_type_id");
-
-                    b.Navigation("Process");
-
-                    b.Navigation("ProcessStepStatus");
-
-                    b.Navigation("ProcessStepType");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProviderCompanyDetail", b =>
@@ -9405,6 +9396,16 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
                         .HasConstraintName("fk_company_linked_technical_users_technical_users_technical_us");
 
                     b.Navigation("TechnicalUser");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.Process<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.Navigation("ProcessSteps");
+                });
+
+            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.Framework.Processes.Library.Entities.ProcessStepStatus<Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessTypeId, Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Enums.ProcessStepTypeId>", b =>
+                {
+                    b.Navigation("ProcessSteps");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Address", b =>
@@ -9797,36 +9798,6 @@ namespace Org.Eclipse.TractusX.Portal.Backend.PortalBackend.Migrations.Migration
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.PrivacyPolicy", b =>
                 {
                     b.Navigation("OfferAssignedPrivacyPolicies");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.Process", b =>
-                {
-                    b.Navigation("CompanyApplication");
-
-                    b.Navigation("CompanyInvitation");
-
-                    b.Navigation("CompanyUserAssignedProcess");
-
-                    b.Navigation("ExternalTechnicalUserCreationData");
-
-                    b.Navigation("IdentityProviderAssignedProcess");
-
-                    b.Navigation("MailingInformation");
-
-                    b.Navigation("NetworkRegistration");
-
-                    b.Navigation("OfferSubscription");
-
-                    b.Navigation("ProcessSteps");
-
-                    b.Navigation("SdCreationCompany");
-
-                    b.Navigation("SdCreationConnector");
-                });
-
-            modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepStatus", b =>
-                {
-                    b.Navigation("ProcessSteps");
                 });
 
             modelBuilder.Entity("Org.Eclipse.TractusX.Portal.Backend.PortalBackend.PortalEntities.Entities.ProcessStepType", b =>

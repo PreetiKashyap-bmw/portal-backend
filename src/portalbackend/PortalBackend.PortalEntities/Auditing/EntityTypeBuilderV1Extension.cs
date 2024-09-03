@@ -101,7 +101,7 @@ public static class EntityTypeBuilderV1Extension
     {
         var memberBindings = sourceProperties.Select(p =>
                 CreateMemberAssignment(typeof(TAuditEntity).GetMember(p.Name)[0], Expression.Property(entity, p)))
-                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1Id.ToString())[0], Expression.New(typeof(Guid))))
+                    .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1Id.ToString())[0], Expression.Constant(Guid.NewGuid())))
                     .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1OperationId.ToString())[0], Expression.Constant(auditOperationId)))
                     .Append(CreateMemberAssignment(typeof(TAuditEntity).GetMember(AuditPropertyV1Names.AuditV1DateLastChanged.ToString())[0], Expression.New(typeof(DateTimeOffset))));
 
