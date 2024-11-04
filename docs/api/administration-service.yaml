@@ -5529,11 +5529,6 @@ paths:
       responses:
         '200':
           description: The business partner numbers have been added successfully.
-          content:
-            application/json:
-              schema:
-                type: integer
-                format: int32
         '400':
           description: Business Partner Numbers must not exceed 20 characters.
           content:
@@ -5575,11 +5570,6 @@ paths:
       responses:
         '200':
           description: The business partner number have been added successfully.
-          content:
-            application/json:
-              schema:
-                type: integer
-                format: int32
         '400':
           description: Business Partner Numbers must not exceed 20 characters.
           content:
@@ -5630,11 +5620,6 @@ paths:
       responses:
         '200':
           description: Empty response on success.
-          content:
-            application/json:
-              schema:
-                type: integer
-                format: int32
         '403':
           description: ForbiddenException if both users does not belongs to same company
           content:
@@ -7596,6 +7581,14 @@ components:
         - SELF_DESCRIPTION_COMPANY_CREATION
         - RETRIGGER_SELF_DESCRIPTION_CONNECTOR_CREATION
         - RETRIGGER_SELF_DESCRIPTION_COMPANY_CREATION
+        - DELETE_BPN_FROM_CENTRAL_USER
+        - DELETE_BPN_FROM_IDENTITY
+        - RETRIGGER_DELETE_BPN_FROM_CENTRAL_USER
+        - CHECK_LEGAL_ENTITY_DATA
+        - ADD_BPN_TO_IDENTITY
+        - CLEANUP_USER_BPN
+        - RETRIGGER_CHECK_LEGAL_ENTITY_DATA
+        - RETRIGGER_ADD_BPN_TO_IDENTITY
       type: string
     ProviderDetailData:
       type: object
